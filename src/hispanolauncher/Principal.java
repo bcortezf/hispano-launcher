@@ -544,7 +544,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
             String helper = currentDirFile.getAbsolutePath();
             
             
-            Image image = Toolkit.getDefaultToolkit().getImage("src/meddia/icon.gif");
+            Image image = Toolkit.getDefaultToolkit().getImage("media/icon.gif");
          
             
             ActionListener listener = (ActionEvent e) -> {
