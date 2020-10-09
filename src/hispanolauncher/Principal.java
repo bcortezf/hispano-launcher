@@ -543,7 +543,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
             File currentDirFile = new File(".");
             String helper = currentDirFile.getAbsolutePath();
             
-            
+            sasdasdasd
             Image image = Toolkit.getDefaultToolkit().getImage("media/icon.gif");
          
             
