@@ -93,6 +93,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
         this.jPanel2.setBackground(new Color(0,0,0,110));
         this.jPanel2.setOpaque(true);
         
+        
         ajustarVentana();
       
       
