@@ -53,14 +53,14 @@ public class Panel_Instalacion extends javax.swing.JPanel {
         pnlInstalacion.setLayout(pnlInstalacionLayout);
         pnlInstalacionLayout.setHorizontalGroup(
             pnlInstalacionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblInstalacion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+            .addComponent(lblInstalacion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
         );
         pnlInstalacionLayout.setVerticalGroup(
             pnlInstalacionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlInstalacionLayout.createSequentialGroup()
                 .addGap(29, 29, 29)
                 .addComponent(lblInstalacion)
-                .addContainerGap(343, Short.MAX_VALUE))
+                .addContainerGap(412, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

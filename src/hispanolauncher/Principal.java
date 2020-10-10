@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,6 +51,11 @@ import javax.swing.JOptionPane;
  *
  * @author inuckles
  */
+
+
+   
+
+
 public class Principal extends javax.swing.JFrame implements ActionListener {
 
     private String cur_dir;
@@ -58,13 +64,15 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     Panel_Instalacion instalacion = new Panel_Instalacion();
     Panel_Configuracion configuracion = new Panel_Configuracion();
     Panel_Status status = new Panel_Status();
+     Hashtable<String, String> data = new Hashtable<String, String>();
+    Gson gson = new Gson();
     /**
      * Creates new form Principal
      */
     public Principal() {
         log("Launcher Iniciado.");
         crearDirectorioLauncher();
-        crearJsonPerfiles();
+    //crearJsonPerfiles();
         
         
         //Al iniciarse por primera vez, el launcher crea la carpeta .minecraft//.hispano_launcher
@@ -228,7 +236,157 @@ public void dumpJSONElement(JsonElement elemento) {
     
     
 }
-       
+    
+
+    
+    public boolean getPerfilHispano(JsonElement elemento) {
+    
+    
+        if (encontroPerfil){
+           // System.out.println("Encontro el perfil y sale" + elemento); 
+           
+           //String nombre ="ServidorHispanoCambiado2";
+         
+           String usuario="";
+           String javaArgs = "-Xmx69G";
+           
+            
+            //elemento.getAsJsonObject().get("authentication").getAsJsonObject().addProperty("username", usuario);
+            //elemento.getAsJsonObject().addProperty("javaArgs", javaArgs);
+            //elemento.getAsJsonObject().addProperty("name", "ServidorHispanoCambiado2");
+            
+           // data.put("name", usuario);
+          //  data.put("javaArgs", javaArgs);
+            configuracion.rellenarData(data,elemento);
+           // System.out.println("Elemento:" + elemento); 
+            
+            encontroPerfil = false;
+            
+            
+        }
+                // Si el elemento es un objeto
+                // Entrará aqui porque profiles es un objeto, y solo queremos que haga esto cuando está en profiles
+                if (elemento.isJsonObject()) {      
+                    JsonObject obj = elemento.getAsJsonObject();
+                    java.util.Set<java.util.Map.Entry<String,JsonElement>> entradas = obj.entrySet();
+                    java.util.Iterator<java.util.Map.Entry<String,JsonElement>> iter = entradas.iterator(); 
+                    JsonElement servidorHispano = obj.get("Servidor Hispano");
+
+                    // Comenzamos a recorrer todas las keys del JSON
+                    while (iter.hasNext()) {
+                      java.util.Map.Entry<String,JsonElement> entrada = iter.next(); // Esto permite que pase al siguiente elemento o key
+                            
+                            
+                           // System.out.println(entrada.getKey() + " == " + entrada.getValue());  
+                                    
+                       //if (obj.get("profiles").isJsonObject()){
+                    if (entrada.getValue().isJsonObject() ){ 
+                        
+                        if ("Servidor Hispano".equals(entrada.getKey())){
+                          //  System.out.println(entrada.getKey() + " == " + entrada.getValue()); 
+                            encontroPerfil = true;
+                        }
+                        
+                        if  ("profiles".equals(entrada.getKey())){
+                            JsonElement valor = entrada.getValue().getAsJsonObject().get("name");
+                           // System.out.println(valor);
+                        }else{
+                            
+                        }
+                            
+                        getPerfilHispano(entrada.getValue());
+                    }
+                     
+                      
+                        // Si el nombre de la key es profiles, significa que la lectura del JSON se encuentra
+                        // en los perfiles.
+                        /*if (entrada.getKey().equals("profiles")){
+                            estaEnPerfil = true;
+                            //System.out.println(entrada.getKey() + " == " + entrada.getValue());  
+                            getPerfilHispano(entrada.getValue());
+                            
+                        }*/
+                        
+                       
+                       // System.out.println(servidorHispano);
+                        
+                       
+                      
+                           
+                            
+                                    
+                       
+
+                        // Entrará aca cuando el lector del JSON esté en los perfiles.
+                        if (estaEnPerfil){
+                            // En teoria, recorre todas las llaves del objeto "profile"
+                            // Por ende, queremos que cuando haya una key con nombre "Servidor Hispano"
+                            // Se interpretee como que ya existe el perfil de Hispano.
+                           // System.out.println(entrada.getKey() + " == " + entrada.getValue());
+                            //data.put(entrada.getKey(), entrada.getValue().toString());
+                            
+
+                            if (entrada.getKey().equals("Servidor Hispano")){
+                               // System.out.println("ENCONTRO EL SERVIDOR2!!!"); 
+                             //   System.out.println(entrada.getKey());
+                                encontroPerfil = true;
+                                estaEnPerfil=false;
+                            }else{     
+                               // Si no encuentra el perfil, agrega uno definido anteriormente en el JSON
+                              estaEnPerfil=true;
+                            }
+                        }
+                        
+                        if(encontroPerfil){
+                            getPerfilHispano(entrada.getValue());
+                           /// System.out.println(entrada.getKey() + " = " + entrada.getValue());
+                            if (entrada.getValue().isJsonPrimitive())
+                                
+                                if (entrada.getValue().isJsonObject()){
+                                    
+                                    
+                                }else{
+                                    
+                                    if (!"Servidor Hispano".equals(entrada.getKey())){
+                                       // System.out.println("Insertando.. " + entrada.getKey() + " = " + entrada.getValue());
+                                        data.put(entrada.getKey(),entrada.getValue().getAsString());
+                                    }
+                                
+                                }
+                            
+                                
+                                
+                                
+                            
+                            if (entrada.getValue().isJsonObject()&& !"authentication".equals(entrada.getKey()) ){
+                                //System.out.println("Termina de buscar porque " + entrada.getValue().isJsonObject() + " y " + !"authentication".equals(entrada.getKey()) + " | "+ entrada.getValue());
+                                encontroPerfil=false;
+                            }
+                            
+                        
+                        }
+                    }  
+                }
+
+              
+                        // System.out.println("tabla= " + data.toString());
+    
+                
+        return false;
+        
+}
+ 
+
+
+
+
+
+
+
+
+
+
+
     private void crearDirectorioLauncher(){
     
         
@@ -459,6 +617,9 @@ public void dumpJSONElement(JsonElement elemento) {
         btnConfiguracion.setContentAreaFilled(false);
         btnConfiguracion.setOpaque(true);
         btnConfiguracion.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnConfiguracionMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btnConfiguracionMouseEntered(evt);
             }
@@ -635,6 +796,35 @@ public void dumpJSONElement(JsonElement elemento) {
         this.btnInicio.setForeground(Color.white);
         this.btnConfiguracion.setForeground(Color.yellow);
         this.btnInstalacion.setForeground(Color.white);
+        
+        
+         // Revisamos si el jugador tiene el perfil del servidor hispano.
+        String Directorio = System.getenv("APPDATA") + "\\.minecraft";
+        File DirJson = new File(Directorio);
+
+        // Verificamos si el directorio .minecraft existe
+        if (DirJson.exists()) {
+            
+            try { //Establecemos la ruta del launcher_profiles y nos preparamos para abrir el archivo
+                File Json = new File(Directorio + "\\launcher_profiles.json");
+                System.out.println(Json.getAbsolutePath());
+                JsonParser parser = new JsonParser();
+                FileReader fr = new FileReader(Json);
+                JsonElement datos = parser.parse(fr);
+                
+                //Hasta este punto, el JSON ya se abrió. 
+                //Con esta funcion, manejamos los datos dentro del objeto JSON.
+                getPerfilHispano(datos);
+                
+                
+                
+            } catch (FileNotFoundException ex) {
+                log("Problema con Json    :" + ex);
+            }
+        }else{
+            //Si no encuentra el archivo JSON, deberia descargar un template aquí.
+            
+        }
       
     }//GEN-LAST:event_btnConfiguracionActionPerformed
 
@@ -771,6 +961,17 @@ private int tx, ty;
         this.lblX.setForeground(Color.white);
     }//GEN-LAST:event_lblXMouseExited
 
+    private void btnConfiguracionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConfiguracionMouseClicked
+
+       
+        
+        
+        
+    }//GEN-LAST:event_btnConfiguracionMouseClicked
+
+    
+    
+    
     
  
     public void log(String texto){
