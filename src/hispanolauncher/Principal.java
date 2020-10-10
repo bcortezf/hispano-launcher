@@ -111,215 +111,124 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     private void crearJsonPerfiles(){
 
         String Directorio = System.getenv("APPDATA") + "\\.minecraft";
-        
-        
-        
-        
         File DirJson = new File(Directorio);
 
+        // Verificamos si el directorio .minecraft existe
         if (DirJson.exists()) {
-
-               File Json = new File(Directorio + "\\launcher_profiles.json");
-               JsonParser parser = new JsonParser();
-            try {
+            
+            try { //Establecemos la ruta del launcher_profiles y nos preparamos para abrir el archivo
+                File Json = new File(Directorio + "\\launcher_profiles.json");
+                JsonParser parser = new JsonParser();
                 FileReader fr = new FileReader(Json);
                 JsonElement datos = parser.parse(fr);
-
-
+                
+                //Hasta este punto, el JSON ya se abrió. 
+                //Con esta funcion, manejamos los datos dentro del objeto JSON.
                 dumpJSONElement(datos);
-
-
-                //Escribe el JsonElemeent actual (ya modificado) en el archivo especificado
+                
+                //Escribe el JSON modificado en el archivo json.
                 try (Writer writer = new FileWriter(Directorio + "\\launcher_profiles.json")) {
                     Gson gson = new GsonBuilder().create();
                     gson.toJson(datos, writer);
                 }  catch (IOException ex) {
                        Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                   }
-
-
-
-
-
-
-
-
+                }
             } catch (FileNotFoundException ex) {
                 log("Problema con Json    :" + ex);
             }
 
-            // METODO ANTERIOR
-            /*     Scanner lectorHispanoFile;
-                try {
-                lectorHispanoFile = new Scanner(Json);
 
-                while(lectorHispanoFile.hasNextLine()){
-                System.out.println(lectorHispanoFile.nextLine());
-                }
-
-                } catch (FileNotFoundException ex) {
-                log("NO FUNCIONA   :" + ex);
-                } */
-
+        }else{
+            //Si no encuentra el archivo JSON, deberia descargar un template aquí.
         }
     }
     
     
-    boolean estaEnPerfil = false;
+boolean encontroPerfil = false;
+boolean estaEnPerfil = false;
 
- 
+
+
+// No funciona cuanndo no haay NINGUN perfil
+
 public void dumpJSONElement(JsonElement elemento) {
    
-    String json = "{\"authentication\":{\"username\":\"\"},\"name\":\"Servidor Hispano\",\"gameDir\":\"%APPDATA%\\\\.hispano_launcher\\\\minecraft\",\"lastVersionId\":\"1.12.2-forge1.12.2-14.23.5.2838\",\"javaArgs\":\"-Xmx8G\",\"typo\":\"NoPremium\",\"useForge\":false}";
+    String ruta = System.getenv("APPDATA");
+    ruta = ruta.replace("\\", "\\\\");
+    
+    String RAM = "-Xmx2G";
+    // Armamos el JSON.
+    String json = "{\"authentication\":{\"username\":\"\"},\"name\":\"Servidor Hispano\",\"gameDir\":\""+ruta+"\\\\.hispano_launcher\\\\minecraft\",\"lastVersionId\":\"1.12.2-forge1.12.2-14.23.5.2838\",\"javaArgs\":\""+RAM+"\",\"typo\":\"NoPremium\",\"useForge\":false}";
+    
+    // Creamos un nuevo JsonObject 
     JsonObject objetosPerfil = new JsonParser().parse(json).getAsJsonObject();
+      
     
-    //JsonObject objetosDelPerfil = perfilServidor.getAsJsonObject();
-    //JsonObject perfil = perfilServidor.getAsJsonObject();
-    
-    System.out.println(objetosPerfil.toString());
-    
-    
-    
-    
-    
-    
-    
+    // Si el elemento es un objeto
+    // Entrará aqui porque profiles es un objeto, y solo queremos que haga esto cuando está en profiles
     if (elemento.isJsonObject()) {
-        // Es un conjunto de pares clave, valor
-        // Para cada par, imprimir la clave y llamar a dumpJSONElement(valor)
-        //System.out.println("Es Objeto" + elemento);
-        
-        
+              
         JsonObject obj = elemento.getAsJsonObject();
+
+        
+
         java.util.Set<java.util.Map.Entry<String,JsonElement>> entradas = obj.entrySet();
         java.util.Iterator<java.util.Map.Entry<String,JsonElement>> iter = entradas.iterator();
         
-        
+        // Comenzamos a recorrer todas las keys del JSON
         while (iter.hasNext()) {
-            java.util.Map.Entry<String,JsonElement> entrada = iter.next();
-            
-                
-                if (estaEnPerfil){
-                    System.out.println(entrada.getKey() + " == " + entrada.getValue());
-                    obj.add("1.12.2 SERVER HISPANO", objetosPerfil);
-                    
-                    
-                    /*
-                
-                    
-                    objetosDelPerfil.addProperty("name", "Servidor Hispano JSON");
-                    objetosDelPerfil.addProperty("gameDir", System.getenv("APPDATA") + "\\.hispano_launcher\\minecraft");
-                    objetosDelPerfil.addProperty("lastVersionId", "1.12.2-forge1.12.2-14.23.5.2838");
-                    objetosDelPerfil.addProperty("javaArgs", "Servidor Hispano JSON");
-                    objetosDelPerfil.addProperty("name", "-Xmx8G");
-                    objetosDelPerfil.addProperty("typo", "NoPremium");
-                    objetosDelPerfil.addProperty("useForge", "false");*/
-                    
-                   // perfil.add("Servidor", );
-                    
-                    
-                    estaEnPerfil = false;
-                }
-                
-            if ("profiles".equals(entrada.getKey())){
-               // System.out.println(entrada.getKey() + " == " + entrada.getValue());
-                
+          java.util.Map.Entry<String,JsonElement> entrada = iter.next(); // Esto permite que pase al siguiente elemento o key
+         // System.out.println(entrada.getKey() + " == " + entrada.getValue());
+
+          
+            // Si el nombre de la key es profiles, significa que la lectura del JSON se encuentra
+            // en los perfiles.
+            if (entrada.getKey().equals("profiles")){
                 estaEnPerfil = true;
                 dumpJSONElement(entrada.getValue());
-                
-                /*
-                Gson gson = new Gson();
-                String jsonOutput = gson.toJson(elemento);
-                System.out.println(jsonOutput);
-                */
-                
             }
             
-            
-            
-            
-        }
-        
-    
-    } else if (elemento.isJsonArray()) {
-        // Es un conjunto de valores, que pueden ser elementos simples o compuestos
-        // Para cada valor, llamar a dumpJSONElemento(valor)
-        System.out.println("Es Array");
-     
-    } else if (elemento.isJsonPrimitive()) {
-        // Es un elemento simple. Determinar si se trata de un valor booleano,
-        // un número o cadena de texto
-        System.out.println("Es Primitive");
-      
-    } else if (elemento.isJsonNull()) {
-        System.out.println("Es NULL");
-    } else {
-        System.out.println("Es otra cosa");
-    }
-}
- 
-                 
-    /*
-    private static void dumpJSONElement2(JsonElement elemento) {
-        
-        
-        if (elemento.isJsonObject()) {
-        
-        JsonObject obj = elemento.getAsJsonObject();
-        java.util.Set<java.util.Map.Entry<String,JsonElement>> entradas = obj.entrySet();
-        java.util.Iterator<java.util.Map.Entry<String,JsonElement>> iter = entradas.iterator();
-      
-        
-                    
-        boolean encontroPerfil = false;
-        
-            while (iter.hasNext()) {
-                java.util.Map.Entry<String,JsonElement> entrada = iter.next();
-                dumpJSONElement(entrada.getValue()); 
-
-
-
-
-                    if ("profiles".equals(entrada.getKey())){   
-                       System.out.println("Entro a profiiles");
-
-                        System.out.println(entrada.getKey() + " = " + entrada.getValue());
-
-                    }
-
-
-
-                if ("name".equals(entrada.getKey())){   
-                     if (entrada.getValue().getAsString().equals("1.12.2 SERVER HISPANO")){
-                        //System.out.println("El valor de " + entrada.getKey() + " = " +  entrada.getValue().getAsString());
-
-                       // obj.add(entrada.getKey(), entrada.getValue());
-                        //System.out.println(obj);
-                        encontroPerfil=true;  
-
-
-                     }
+            // Entrará aca cuando el lector del JSON esté en los perfiles.
+            if (estaEnPerfil){
+                
+                // En teoria, recorre todas las llaves del objeto "profile"
+                // Por ende, queremos que cuando haya una key con nombre "Servidor Hispano"
+                // Se interpretee como que ya existe el perfil de Hispano.
+                //System.out.println(entrada.getKey() + " == " + entrada.getValue());
+                
+                if (entrada.getKey().equals("Servidor Hispano")){
+                    System.out.println("ENCONTRO EL SERVIDOR!!!"); 
+                    encontroPerfil = true;
+                    estaEnPerfil=false;
+                }else{     
+                   // Si no encuentra el perfil, agrega uno definido anteriormente en el JSON
+                   
+                   // Se cae acá
+                   //print("No encuentra servidor");
+                   
+                   estaEnPerfil=true;
                 }
 
-
-                if ("javaArgs".equals(entrada.getKey()) && encontroPerfil ){        
-                    //System.out.println("El valor de " + entrada.getKey() + " = " +  entrada.getValue().getAsString());
-
-                    Gson gson = new Gson();
-                    String datos = "-Xmx16G";
-                    entrada.setValue(gson.toJsonTree(datos));
-                    System.out.println("Cambia valor");
-
-                    encontroPerfil=false;
+                if (elemento.isJsonObject()){
+                  //dumpJSONElement(entrada.getValue());
                 }
-
-
-
             }
         }  
     }
-    */
+    // Despues de recorrer todo el JSON, verificamos si encontro o no el perfil.
+
     
+    if (encontroPerfil && !estaEnPerfil && (elemento.getAsJsonObject().get("profiles") != null) ){
+        print("El perfil existe." );
+    }else if(elemento.getAsJsonObject().get("profiles") != null){
+        print("El perfil no existe.");
+        JsonObject obj = elemento.getAsJsonObject();
+        obj.get("profiles").getAsJsonObject().add("Servidor Hispano", objetosPerfil.getAsJsonObject());
+    }
+    
+    
+}
+       
     private void crearDirectorioLauncher(){
     
         
