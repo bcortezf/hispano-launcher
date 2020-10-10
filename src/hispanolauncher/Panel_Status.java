@@ -53,6 +53,14 @@ public class Panel_Status extends javax.swing.JPanel   {
     public Panel_Status() {
             initComponents();
             
+            
+             String folder = System.getenv("APPDATA") + "\\.hispano_launcher\\minecraft\\version_hispano.txt";
+             
+                   
+                   
+                
+
+            
            // descargarMinecraft();
             
             
@@ -102,7 +110,6 @@ public class Panel_Status extends javax.swing.JPanel   {
                 try {
                     progresoLauncher.setStringPainted(false);
                     
-                    
                     URL url = new URL("https://swd.cl/mods.zip");
                     HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
                     long completeFileSize = httpConnection.getContentLength();
@@ -146,7 +153,7 @@ public class Panel_Status extends javax.swing.JPanel   {
                     lblDescripcion.setText("Actualización descargada. ");
                     btnStatus.setText("Jugar");
                     
-                    log("Finaliza la descarga de Minecraft" + puedeJugar);
+                    log("Finaliza la descarga de Minecraft");
                     actualizarVersion();
                     
                     
@@ -218,10 +225,32 @@ public class Panel_Status extends javax.swing.JPanel   {
     private void checkInstalacion(){
        
        String rutaAppData = System.getenv("APPDATA");
-       String rutaMC = rutaAppData + "\\.minecraft";
        
+       
+        
+        
+        
+        String forgeDIR = rutaAppData + "\\.minecraft\\libraries\\net\\minecraftforge\\forge\\1.12.2-14.23.5.2838";
+        String forgeFile = "\\forge-1.12.2-14.23.5.2838.jar";
+        
+        File forgeFolder = new File(forgeDIR);
+        File forgeJAR = new File(forgeDIR+forgeFile);
+        
+        if (!forgeFolder.exists()){
+            forgeFolder.mkdir();
+        }
+        
+        if (!forgeJAR.exists()){
+            descargarForge();
+        }
+        
+        
+        
+        
+        String rutaMC = rutaAppData + "\\.hispano_launcher\\minecraft";
         File dirMC = new File(rutaMC);
         boolean existeDir = dirMC.exists();
+        print(dirMC.getAbsolutePath());
         
         // Verifica si existe la carpeta .minecraft
         if (existeDir){
@@ -279,6 +308,8 @@ public class Panel_Status extends javax.swing.JPanel   {
                                 ejecutarMinecraft();
                                 debeActualizar=false;
                                 puedeJugar = true;
+                            }else{
+                                log("ERROR: Despues de verificar el launcher, aun así no lo tenía. ");
                             }
                                     
                             
@@ -336,6 +367,13 @@ public class Panel_Status extends javax.swing.JPanel   {
          
         log("Verificando si el usuario tiene el launcher YoFenix.");
         
+        if (!directorio.exists()){
+            log("Directorio launcher no existe, Creando uno.");
+            if (!directorio.mkdir())
+                 log("No se pudo crear el directorio del launcher.");
+         }
+        
+        
         if (directorio.exists()){
             log("Directorio launcher existe.");
             File yofenix = new File(rutaAppData + "yofenix.jar");
@@ -344,14 +382,9 @@ public class Panel_Status extends javax.swing.JPanel   {
                 return true;
             }else{
                 descargarYoFenixLauncher();
-                
-                
+                ejecutarMinecraft();
             }
-         }else{
-            log("Directorio launcher no existe, Creando uno.");
-            if (!directorio.mkdir())
-                 log("No se pudo crear el directorio del launcher.");
-         }
+        }
          
          
         return false;
@@ -359,8 +392,8 @@ public class Panel_Status extends javax.swing.JPanel   {
     
     
     
-    
     private void descargarYoFenixLauncher(){
+        
         
          Runnable updatethread = () -> {
                 try {
@@ -416,6 +449,8 @@ public class Panel_Status extends javax.swing.JPanel   {
                     
                     sleep(500);
                     lblDescripcion.setText("Launcher Descargado, iniciando...");
+                    sleep(500);
+                    lblDescripcion.setText("");
                     
                     
                     ejecutarMinecraft();
@@ -440,10 +475,93 @@ public class Panel_Status extends javax.swing.JPanel   {
      
         
         
+    }
+    
+    
+    
+    
+    
+    
+        private void descargarForge(){
         
         
-        
-        
+         Runnable updatethread = () -> {
+                try {
+                    progresoLauncher.setStringPainted(false);
+                    
+                    // Establecemos la URL de donde descargará el archivo
+                    URL url = new URL("https://swd.cl/forge.jar");
+                    // Realizamos la conexión
+                    HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
+                    // Obtenemos el tamaño del archivo a descargar
+                    long completeFileSize = httpConnection.getContentLength();
+                    // Definimos la ruta donde se descargará el archivo
+                    String rutaDescarga = System.getenv("APPDATA") + "\\.minecraft\\libraries\\net\\minecraftforge\\forge\\1.12.2-14.23.5.2838\\forge-1.12.2-14.23.5.2838.jar";
+                    // Abrimos los streams para descargar y grabar el archivo
+                    java.io.BufferedInputStream in = new java.io.BufferedInputStream(httpConnection.getInputStream());
+                    java.io.FileOutputStream fos = new java.io.FileOutputStream(rutaDescarga);
+                    java.io.BufferedOutputStream bout = new BufferedOutputStream(
+                            fos, 1024);
+                    byte[] data = new byte[1024];
+                    long downloadedFileSize = 0;
+                    int x1 = 0;
+                    
+                    
+                    log("Inicia descarga del forge");
+                                            
+                    while ((x1 = in.read(data, 0, 1024)) >= 0) {
+                        downloadedFileSize += x1;
+                        
+                        // Calcula el progreso
+                        long descargado = downloadedFileSize/1024;
+                        long porDescargar = completeFileSize/1024;
+                        final int currentProgress = (int) ((((double)downloadedFileSize) / ((double)completeFileSize)) * 100d);
+                        //System.out.println((currentProgress * 100) /100000);
+                        // update progress bar
+                        
+                        SwingUtilities.invokeLater(() -> {
+                            progresoLauncher.setValue(currentProgress);
+                            lblDescripcion.setText("Descargando Forge...  " + descargado + " kb / "+ porDescargar + " kb");
+                            estaActualizando = true;
+                            
+                            
+                                
+                        });
+                        bout.write(data, 0, x1);
+                    }
+                    bout.close();
+                    in.close();
+                    
+                    // Entrará aqui cuando se termine de descargar la nueva actualización.
+                    
+                    log("Finaliza descarga de Launcher");
+                    
+                    
+                    sleep(500);
+                    lblDescripcion.setText("Launcher Descargado, iniciando...");
+                    sleep(500);
+                    lblDescripcion.setText("");
+                    
+                    
+                    estaActualizando = false;
+                    debeActualizar=false;
+                    puedeJugar = true;
+                    
+                    
+                }catch (FileNotFoundException e) {
+                    log("Error al descargar launcher (FileNotFoundException): " + e);
+                }catch (IOException e) {
+                    log("Error al descargar launcher (IOException): " + e);
+                } catch (InterruptedException ex) {
+                 Logger.getLogger(Panel_Status.class.getName()).log(Level.SEVERE, null, ex);
+             }
+            };
+        new Thread(updatethread).
+
+        start();
+       
+            
+     
         
         
     }
@@ -489,7 +607,19 @@ public class Panel_Status extends javax.swing.JPanel   {
    
     private void actualizarVersion(){
     
-               
+            print("Actualizará versión");
+        String rutaLOG = System.getenv("APPDATA") + "\\.hispano_launcher\\minecraft\\version_hispano.txt";
+        File file = new File(rutaLOG);
+        
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException ex) {
+                    log("Hubo un error al crear el archivo version_hispano.txt. " + ex);
+                }
+            }
+        
+        
 
         // escribe la nueva version en el archivo
         try { 
@@ -504,23 +634,21 @@ public class Panel_Status extends javax.swing.JPanel   {
             print(versionInternet);
             
             try {
-                FileWriter myWriter = new FileWriter(System.getenv("APPDATA") + "\\.minecraft\\version_hispano.txt"); 
+               
+                FileWriter myWriter = new FileWriter(rutaLOG); 
                 myWriter.write(versionInternet);
                 myWriter.close();
-                System.out.println("Successfully wrote to the file.");
+                log("Version Actualizada correctamente a la v" + versionInternet);
               } catch (IOException e) {
-                System.out.println("An error occurred.");
+                log("ERROR: " + e);
               }
            
             btnStatus.setText("Jugar"); 
-            
             debeActualizar=false;
-            puedeJugar = true;
-
-            
+            puedeJugar = true;           
             
         } catch (IOException ex) {
-            Logger.getLogger(Panel_Status.class.getName()).log(Level.SEVERE, null, ex);
+                log("ERROR: " + ex);
         }
          
      
@@ -528,15 +656,12 @@ public class Panel_Status extends javax.swing.JPanel   {
     }
     
     
+    
     public void log(String texto){
             
                 String rutaLog = System.getenv("APPDATA") + "\\.hispano_launcher\\logs\\";
-                File dirLog = new File(rutaLog);
-                boolean existeDir = dirLog.exists();
-                if (!existeDir)
-                    if (!dirLog.mkdir()){
-                        JOptionPane.showMessageDialog(null,"Error al crear la carpeta de logs.");
-                    }
+
+                
                 Date fecha = new Date(); 
                 SimpleDateFormat formato = new SimpleDateFormat("dd-MM-YYYY");
                 SimpleDateFormat formato2 = new SimpleDateFormat("dd/MM/YYYY HH:mm a");
@@ -633,12 +758,11 @@ public class Panel_Status extends javax.swing.JPanel   {
                 log("Se presiono jugar y se actualizará el minecraft ya que detectó version nueva.");
                 descargarMinecraft();
             }else if (puedeJugar){
+                
+                log("Se presiono jugar y el usuario puedeJugar. Pero verificamos si tiene el launcher");
                 if (verificarYoFenixLauncher()){
-                    try {
-                        ejecutarMinecraft();
-                    } catch (IOException ex) {
-                        Logger.getLogger(Panel_Status.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    log("Tiene el launcher, ejecuta minecraft");
+                    ejecutarMinecraft();
                 }
             }else{
                 checkInstalacion();
@@ -650,19 +774,17 @@ public class Panel_Status extends javax.swing.JPanel   {
         
     }//GEN-LAST:event_btnStatusActionPerformed
 
-    public void ejecutarMinecraft() throws IOException{
+    public void ejecutarMinecraft(){
         
         
         
         String launcher = System.getenv("APPDATA") + "\\.hispano_launcher\\launcher\\yofenix.jar";
-        System.out.println(launcher);
-        //Runtime.getRuntime().exec("cmd /c start " + launcher);
-        Process proc = Runtime.getRuntime().exec("java -jar " + launcher);
         
-        
-      //  ProcessBuilder pb = new ProcessBuilder("/path/to/java", "-jar", "your.jar");
-       // pb.directory(new File("preferred/working/directory"));
-        //Process p = pb.start();
+        try {
+            Process proc = Runtime.getRuntime().exec("java -jar " + launcher); 
+        } catch (IOException ex) {
+            log("Error al ejecutar el launcher YoFenix." + ex);
+        }
         
         
     }

@@ -1,5 +1,10 @@
 package hispanolauncher;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,7 +26,10 @@ import java.awt.MouseInfo;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
@@ -51,8 +59,10 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
      * Creates new form Principal
      */
     public Principal() {
-        crearDirectorioLauncher();
         log("Launcher Iniciado.");
+        crearDirectorioLauncher();
+        crearJsonPerfiles();
+        
         
         //Al iniciarse por primera vez, el launcher crea la carpeta .minecraft//.hispano_launcher
         
@@ -90,23 +100,168 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     
     
     
+    private void primeraVez(){
+        // Cuando el launcher se ejecuta por primera vez, entrará acá
+    }
     
+    private void crearJsonPerfiles(){
+
+        String Directorio = System.getenv("APPDATA") + "\\.minecraft";
+        
+        
+        
+        
+        File DirJson = new File(Directorio);
+
+        if (DirJson.exists()) {
+
+               File Json = new File(Directorio + "\\launcher_profiles.json");
+               JsonParser parser = new JsonParser();
+            try {
+                FileReader fr = new FileReader(Json);
+                JsonElement datos = parser.parse(fr);
+
+
+                dumpJSONElement(datos);
+
+
+                //Escribe el JsonElemeent actual (ya modificado) en el archivo especificado
+                try (Writer writer = new FileWriter(Directorio + "\\launcher_profiles.json")) {
+                    Gson gson = new GsonBuilder().create();
+                    gson.toJson(datos, writer);
+                }  catch (IOException ex) {
+                       Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                   }
+
+
+
+
+
+
+
+
+            } catch (FileNotFoundException ex) {
+                log("Problema con Json    :" + ex);
+            }
+
+            // METODO ANTERIOR
+            /*     Scanner lectorHispanoFile;
+                try {
+                lectorHispanoFile = new Scanner(Json);
+
+                while(lectorHispanoFile.hasNextLine()){
+                System.out.println(lectorHispanoFile.nextLine());
+                }
+
+                } catch (FileNotFoundException ex) {
+                log("NO FUNCIONA   :" + ex);
+                } */
+
+        }
+    }
+    
+    
+    
+    private static void dumpJSONElement(JsonElement elemento) {
+        
+        
+        if (elemento.isJsonObject()) {
+        
+        JsonObject obj = elemento.getAsJsonObject();
+        java.util.Set<java.util.Map.Entry<String,JsonElement>> entradas = obj.entrySet();
+        java.util.Iterator<java.util.Map.Entry<String,JsonElement>> iter = entradas.iterator();
+      
+        
+                    
+        boolean encontroPerfil = false;
+        
+            while (iter.hasNext()) {
+                java.util.Map.Entry<String,JsonElement> entrada = iter.next();
+                dumpJSONElement(entrada.getValue()); 
+
+
+
+
+                    if ("profiles".equals(entrada.getKey())){   
+                       System.out.println("Entro a profiiles");
+
+                        System.out.println(entrada.getKey() + " = " + entrada.getValue());
+
+                    }
+
+
+
+                if ("name".equals(entrada.getKey())){   
+                     if (entrada.getValue().getAsString().equals("1.12.2 SERVER HISPANO")){
+                        //System.out.println("El valor de " + entrada.getKey() + " = " +  entrada.getValue().getAsString());
+
+                       // obj.add(entrada.getKey(), entrada.getValue());
+                        //System.out.println(obj);
+                        encontroPerfil=true;  
+
+
+                     }
+                }
+
+
+                if ("javaArgs".equals(entrada.getKey()) && encontroPerfil ){        
+                    //System.out.println("El valor de " + entrada.getKey() + " = " +  entrada.getValue().getAsString());
+
+                    Gson gson = new Gson();
+                    String datos = "-Xmx16G";
+                    entrada.setValue(gson.toJsonTree(datos));
+                    System.out.println("Cambia valor");
+
+                    encontroPerfil=false;
+                }
+
+
+
+            }
+        }  
+    }
     
     
     private void crearDirectorioLauncher(){
     
+        
            String folder = System.getenv("APPDATA") + "\\.hispano_launcher";
-           File dir = new File(folder);
+
+           File hispanoLauncherDIR = new File(folder);
+           File minecraftDIR = new File(folder + "\\minecraft");
+           File logsDIR = new File(folder + "\\logs");
            
-           if (dir.exists()){            
-                    System.out.println("Directorio ya existe");
+           
+           //log("Verificando si existe la carpeta .hispano_launcher");
+           
+           if (hispanoLauncherDIR.exists()){
+                    log(".hispano_launcher ya existe");
            }else{
-                if (dir.mkdir()){
-                    System.out.println("Directorio creado");    
+
+                if (hispanoLauncherDIR.mkdir()){
+                    primeraVez();
                 }else{
-                    System.out.println("No se pudo crear el directorio"); 
                 }
            }
+           
+           
+           if (minecraftDIR.exists()){
+           }else{
+                if (minecraftDIR.mkdir()){
+                }else{
+                }
+           }
+           
+           
+           if (logsDIR.exists()){
+           }else{
+                if (logsDIR.mkdir()){
+                }else{
+                }
+           }
+           
+           
+           
            
     }
     
@@ -543,7 +698,6 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
             File currentDirFile = new File(".");
             String helper = currentDirFile.getAbsolutePath();
             
-            sasdasdasd
             Image image = Toolkit.getDefaultToolkit().getImage("media/icon.gif");
          
             
@@ -613,13 +767,12 @@ private int tx, ty;
     
  
     public void log(String texto){
+        
+            String rutaLog = System.getenv("APPDATA") + "\\.hispano_launcher\\logs\\";
+            File logDir = new File(rutaLog);
             
-                String rutaLog = System.getenv("APPDATA") + "\\.hispano_launcher\\logs\\";
-                File dirLog = new File(rutaLog);
-                boolean existeDir = dirLog.exists();
-                if (!existeDir)
-                    if (!dirLog.mkdir())
-                        JOptionPane.showMessageDialog(null,"Error al crear la carpeta de logs.");
+            if (logDir.exists()){
+                
                 Date fecha = new Date(); 
                 SimpleDateFormat formato = new SimpleDateFormat("dd-MM-YYYY");
                 SimpleDateFormat formato2 = new SimpleDateFormat("dd/MM/YYYY HH:mm a");
@@ -634,6 +787,10 @@ private int tx, ty;
                 } catch (IOException ex) {
                     Logger.getLogger(Panel_Inicio.class.getName()).log(Level.SEVERE, null, ex);
                 }
+            
+            }
+                
+               
                 
         }      
     
