@@ -31,7 +31,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -162,8 +165,102 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     }
     
     
+    boolean estaEnPerfil = false;
+
+ 
+public void dumpJSONElement(JsonElement elemento) {
+   
+    String json = "{\"authentication\":{\"username\":\"\"},\"name\":\"Servidor Hispano\",\"gameDir\":\"%APPDATA%\\\\.hispano_launcher\\\\minecraft\",\"lastVersionId\":\"1.12.2-forge1.12.2-14.23.5.2838\",\"javaArgs\":\"-Xmx8G\",\"typo\":\"NoPremium\",\"useForge\":false}";
+    JsonObject objetosPerfil = new JsonParser().parse(json).getAsJsonObject();
     
-    private static void dumpJSONElement(JsonElement elemento) {
+    //JsonObject objetosDelPerfil = perfilServidor.getAsJsonObject();
+    //JsonObject perfil = perfilServidor.getAsJsonObject();
+    
+    System.out.println(objetosPerfil.toString());
+    
+    
+    
+    
+    
+    
+    
+    if (elemento.isJsonObject()) {
+        // Es un conjunto de pares clave, valor
+        // Para cada par, imprimir la clave y llamar a dumpJSONElement(valor)
+        //System.out.println("Es Objeto" + elemento);
+        
+        
+        JsonObject obj = elemento.getAsJsonObject();
+        java.util.Set<java.util.Map.Entry<String,JsonElement>> entradas = obj.entrySet();
+        java.util.Iterator<java.util.Map.Entry<String,JsonElement>> iter = entradas.iterator();
+        
+        
+        while (iter.hasNext()) {
+            java.util.Map.Entry<String,JsonElement> entrada = iter.next();
+            
+                
+                if (estaEnPerfil){
+                    System.out.println(entrada.getKey() + " == " + entrada.getValue());
+                    obj.add("1.12.2 SERVER HISPANO", objetosPerfil);
+                    
+                    
+                    /*
+                
+                    
+                    objetosDelPerfil.addProperty("name", "Servidor Hispano JSON");
+                    objetosDelPerfil.addProperty("gameDir", System.getenv("APPDATA") + "\\.hispano_launcher\\minecraft");
+                    objetosDelPerfil.addProperty("lastVersionId", "1.12.2-forge1.12.2-14.23.5.2838");
+                    objetosDelPerfil.addProperty("javaArgs", "Servidor Hispano JSON");
+                    objetosDelPerfil.addProperty("name", "-Xmx8G");
+                    objetosDelPerfil.addProperty("typo", "NoPremium");
+                    objetosDelPerfil.addProperty("useForge", "false");*/
+                    
+                   // perfil.add("Servidor", );
+                    
+                    
+                    estaEnPerfil = false;
+                }
+                
+            if ("profiles".equals(entrada.getKey())){
+               // System.out.println(entrada.getKey() + " == " + entrada.getValue());
+                
+                estaEnPerfil = true;
+                dumpJSONElement(entrada.getValue());
+                
+                /*
+                Gson gson = new Gson();
+                String jsonOutput = gson.toJson(elemento);
+                System.out.println(jsonOutput);
+                */
+                
+            }
+            
+            
+            
+            
+        }
+        
+    
+    } else if (elemento.isJsonArray()) {
+        // Es un conjunto de valores, que pueden ser elementos simples o compuestos
+        // Para cada valor, llamar a dumpJSONElemento(valor)
+        System.out.println("Es Array");
+     
+    } else if (elemento.isJsonPrimitive()) {
+        // Es un elemento simple. Determinar si se trata de un valor booleano,
+        // un número o cadena de texto
+        System.out.println("Es Primitive");
+      
+    } else if (elemento.isJsonNull()) {
+        System.out.println("Es NULL");
+    } else {
+        System.out.println("Es otra cosa");
+    }
+}
+ 
+                 
+    /*
+    private static void dumpJSONElement2(JsonElement elemento) {
         
         
         if (elemento.isJsonObject()) {
@@ -221,7 +318,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
             }
         }  
     }
-    
+    */
     
     private void crearDirectorioLauncher(){
     
