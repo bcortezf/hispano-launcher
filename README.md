@@ -11,9 +11,17 @@ El objetivo de este programa es permitirle a cualquier usuario, ejecutar y jugar
 - Verifica si tienes los mods necesarios instalados, si no, los descarga de Internet y los instala automáticamente.
 - Descarga y ejecuta el launcher YoFenix
 
+## Características por desarrollar
+- Poder modificar la RAM y el nombre de usuario desde el mismo launcher.
+- Minimizar el launcher automáticamente al estar jugando.
+- Agregar una sección de Galeria dentro del launcher, para poder ver algunas fotografías subidas por los mismos usuarios.
+- Guias y tips en el mismo launcher.
 
 # Reporte de Errores
 Es común tener algunos errores en el launcher, debido a que es una versión muy verde aún. 
 Agradezco reportar errores a mi discord, adjuntarme porfavor el log de ejecución. (Archivo que recopilla información sobre la ejecución del programa) 
 
 Ubicable en **%appdata%/.hispano_launcher/logs**
+
+## Sugerencias
+Frente a cualquier sugerencia/idea que tengas para este proyecto, puedes comentarme la idea por discord (inuckles#2105), o bien, abrir un issue. :)
